@@ -1,7 +1,7 @@
 /*	Author:Tinghui Song
  *  Partner(s) Name: none
  *	Lab Section: 24
- *	Assignment: Lab #4  Exercise #2
+ *	Assignment: Lab #4  Exercise #1
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -14,22 +14,28 @@
 #include "simAVRHeader.h"
 #endif
 enum State{
-	Wait,
-	Inc,
-	Dec,
-	Reset
+	Start,
+	LED0_Released,
+	LED0_Pressed,
+	LED1_Released,
+	LED1_Pressed
 }State;
-void Tick();
 void Tick(){
-	Switch(State){//Transitions
+	switch(State){//Transitions
 		case Start:
-			State = LED0;
+			State = LED0_Released;
 			break;
-		case LED0:
-			State = PA0?LED1:LED0;
+		case LED0_Released:
+			State = PINA?LED0_Pressed:LED0_Released;
 			break;
-		case LED1:
-			State = PA0?LED0:LED1;
+		case LED0_Pressed:
+			State = !PINA?LED1_Released:LED0_Pressed;
+			break;
+		case LED1_Released:
+			State = PINA?LED1_Pressed:LED1_Released;
+			break;
+		case LED1_Pressed:
+			State = !PINA?LED0_Released:LED1_Pressed;
 			break;
 		default:
 			State = Start;
@@ -37,18 +43,18 @@ void Tick(){
 			break;
 	}//Transitions
 	
-	Switch(State){//Actions
-	case Start:
-		break;
-	case LED0:
-		PORTB = 0x01
-		break;
-	case LED1:
-		PORTB = 0x02;
-		break;
-	default:
-		//printf(“default case reached\n”);
-		break;
+	switch(State){//Actions
+		case Start:
+			break;
+		case LED0_Pressed:
+			PORTB = 0x02;
+			break;
+		case LED1_Pressed:
+			PORTB = 0x01;
+			break;
+		default:
+			//printf(“default case reached\n”);
+			break;
 	}//Actions
 
 }
@@ -57,16 +63,16 @@ void Tick(){
 int main(void) {
     /* Insert DDR and PORT initializations */
 	DDRA = 0x00; PORTA = 0xFF;
-	DDRC = 0xFF; PORTC = 0x00;
+	DDRB = 0xFF; PORTB = 0x00;
 
     /* Insert your solution below */
-	unsigned char tempA = 0x00;
+	//unsigned char tempA = 0x00;
 	//unsigned char tempB = 0x00;
 	PORTB = 0x01;
 	State = Start;
     while (1) {
-	tempA = PINA & 0xFF;
-	Tick(tempA);
+	//tempA = PINA & 0xFF;
+	Tick();
     }
     return 1;
 }
