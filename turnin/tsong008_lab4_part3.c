@@ -44,7 +44,7 @@ void Tick(){
 			State = Lock;
 			break;
 		case Lock:
-			if(PINA & 0x04){
+			if((PINA & 0x04)==0x04){
 				State = Combo1;
 			}
 			else{
@@ -52,15 +52,18 @@ void Tick(){
 			}
 			break;
 		case Combo1:
-			if ( !(PINA & 0x04)){
+			if ( (PINA & 0x04)==0x00){
 				State = Combo2;
 			}
+			/*else if (PINA & 0x02){
+				State = Unlock;
+			}*/
 			else{
 				State = Lock;
 			}
 			break;
 		case Combo2:
-			if(PINA & 0x02){
+			if((PINA & 0x02)==0x02){
 				State = Unlock;
 			}
 			else{
@@ -68,7 +71,7 @@ void Tick(){
 			}
 			break;
 		case Unlock:
-			if ( PINA & 0x80){
+			if (PINA & 0x80){
 				State = Lock;
 			}
 			else{

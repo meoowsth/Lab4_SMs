@@ -1,7 +1,7 @@
 /*	Author:Tinghui Song
  *  Partner(s) Name: none
  *	Lab Section: 24
- *	Assignment: Lab #4  Exercise #3
+ *	Assignment: Lab #4  Exercise #2
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -16,64 +16,65 @@
 
 enum State{
 	Start,
-	Lock,
-	Combo1,
-	Combo2,
-	Unlock
+	Wait,
+	Inc,
+	Dec,
+	Reset
 }State;
 
-void Tick();
+unsigned char cnt = 0x07;
+
+unsigned char Tick();
+
+
 
 int main(void) {
     /* Insert DDR and PORT initializations */
 	DDRA = 0x00; PORTA = 0xFF;
-	DDRB = 0xFF; PORTB = 0x00;
+	DDRC = 0xFF; PORTC = 0x00;
 
     /* Insert your solution below */
+	//unsigned char tempA = 0x00;
+	//unsigned char cnt = 0x07;
 	State = Start;
-	PORTB = 0x00;
-	while (1) {
-		Tick();
-   	 }
-	return 1;
+	//PORTC = 0x07;
+    while (1) {
+	//tempA = PINA & 0xFF;
+	Tick();
+	
+    }
+    return 1;
 }
 
-void Tick(){
+unsigned char Tick(){
+	//unsigned char PA0 = PINA & 0x01;
+	//unsigned char PA1 = PINA & 0x02;
 	switch(State){//Transitions
 		case Start:
-			State = Lock;
+			State = Wait;
 			break;
-		case Lock:
-			if(PINA & 0x04){
-				State = Combo1;
+		case Wait:
+			if((PINA & 0x01)){
+				State = Inc;
+			}
+			else if ((PINA & 0x02)){
+				State = Dec;
+			}
+			else if ( (!(PINA & 0x01)) && (!(PINA & 0x02))){
+				State = Reset;
 			}
 			else{
-				State = Lock;
+				State = Wait;
 			}
 			break;
-		case Combo1:
-			if ( !(PINA & 0x04)){
-				State = Combo2;
-			}
-			else{
-				State = Lock;
-			}
+		case Inc:
+			State = Wait;
 			break;
-		case Combo2:
-			if(PINA & 0x02){
-				State = Unlock;
-			}
-			else{
-				State = Lock;
-			}
+		case Dec:
+			State = Wait;
 			break;
-		case Unlock:
-			if ( PINA & 0x80){
-				State = Lock;
-			}
-			else{
-				State = Unlock;
-			}
+		case Reset:
+			State = Wait;
 			break;
 		default:
 			State = Start;
@@ -84,19 +85,29 @@ void Tick(){
 	switch(State){//Actions
 		case Start:
 			break;
-		case Lock:
-			PORTB = 0x00;
+		case Wait:
+			PORTC = cnt;
 			break;
-		case Combo1:
+		case Inc:
+			if (cnt < 0x09){
+				cnt++;
+			}
+			PORTC = cnt;
 			break;
-		case Combo2:
+		case Dec:
+			if (cnt > 0x00){
+				cnt--;
+			}
+			PORTC = cnt;
 			break;
-		case Unlock:
-			PORTB = 0x01;
+		case Reset:
+			cnt = 0x00;
+			PORTC = cnt;
 			break;
 		default:
 			//printf(“default case reached\n”);
 			break;
 	}//Actions
+	return cnt;
 
 }
