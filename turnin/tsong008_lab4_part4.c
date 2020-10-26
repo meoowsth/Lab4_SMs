@@ -20,6 +20,7 @@ enum State{
 	Lock,
 	Combo1,
 	Combo2,
+	Combo_out,
 	Unlock
 }State;
 
@@ -93,6 +94,15 @@ void Tick(){
 				State = Wait;
 			    }
 			break;
+		case Combo_out:
+			if((PINA & 0x02) == 0x02){
+				State = Combo_out;
+			    }
+			    else
+			    {
+				State = Wait;
+			    }
+			    break;
 		default:
 			State = Start;
 			//printf(“reached default case\n”);
