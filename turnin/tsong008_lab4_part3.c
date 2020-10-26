@@ -16,6 +16,7 @@
 
 enum State{
 	Start,
+	Wait,
 	Lock,
 	Combo1,
 	Combo2,
@@ -43,41 +44,54 @@ void Tick(){
 		case Start:
 			State = Lock;
 			break;
-		case Lock:
-			if((PINA & 0x04)==0x04){
+		case Wait:
+			if((PINA & 0x04) == 0x04){
 				State = Combo1;
-			}
-			else{
+			    }
+			else if((PINA & 0x80) == 0x80) {
 				State = Lock;
-			}
+			    }
+			else{
+				State = Wait;
+			    }
+            		break;
+		case Lock:
+			if((PINA & 0x80) == 0x80) {
+				State = Lock;
+			    }
+			    else{
+				State = Wait;
+			    }
 			break;
 		case Combo1:
-			if ( (PINA & 0x04)==0x00){
+			if((PINA & 0x87) == 0x00){
 				State = Combo2;
-			}
-			/*else if (PINA & 0x02){
-				State = Unlock;
-			}*/
-			else{
-				State = Lock;
-			}
+			    }
+			    else if((PINA & 0x04) == 0x04){
+				State = Combo1;
+			    }
+			    else{
+				State = Wait;
+			    }
 			break;
 		case Combo2:
-			if((PINA & 0x02)==0x02){
+			if((PINA & 0x87) == 0x02)  {
 				State = Unlock;
-				//PORTB = 0x01;
-			}
-			else{
-				State = Lock;
-			}
-			break;
+			    }
+			    else if((PINA & 0x87) == 0x00) {
+				State = Combo2;
+			    }
+			    else {
+				State = Wait;
+			    }
+			    break;
 		case Unlock:
-			if (PINA & 0x80){
-				State = Lock;
-			}
-			else{
+			if((PINA & 0x02) == 0x02){
 				State = Unlock;
-			}
+			    }
+			else{
+				State = Wait;
+			    }
 			break;
 		default:
 			State = Start;
