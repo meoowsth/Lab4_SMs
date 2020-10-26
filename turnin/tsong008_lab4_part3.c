@@ -65,6 +65,7 @@ void Tick(){
 		case Combo2:
 			if((PINA & 0x02)==0x02){
 				State = Unlock;
+				//PORTB = 0x01;
 			}
 			else{
 				State = Lock;

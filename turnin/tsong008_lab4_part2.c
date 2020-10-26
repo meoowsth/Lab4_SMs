@@ -1,4 +1,4 @@
-/*	Author:Tinghui Song
+/*	Author: Tinghui Song
  *  Partner(s) Name: none
  *	Lab Section: 24
  *	Assignment: Lab #4  Exercise #2
@@ -8,106 +8,147 @@
  *	code, is my own original work.
  */
 #include <avr/io.h>
-#include <stdio.h>
-#include <stdlib.h>
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
 
-enum State{
-	Start,
-	Wait,
-	Inc,
-	Dec,
-	Reset
-}State;
-
-unsigned char cnt = 0x07;
-
-unsigned char Tick();
 
 
+enum States {Start, Wait, Increment, Decrement, Reset} State;
+
+unsigned char cnt = 7; //initial output PORTC
+
+void Tick()
+{
+    unsigned char tempA = PINA;
+    switch(State){ //transitions
+        case Start:
+            PORTC = cnt;
+            State = Wait;
+            break;
+        case Wait:
+            if((tempA & 0x03) == 0x00){
+                State = Wait;
+            }
+            else if((tempA & 0x03) == 0x01){
+                State = Increment;
+                if(cnt < 9)
+                {
+                    ++cnt;
+                    PORTC = cnt;
+                }
+            }
+            else if((tempA & 0x03) == 0x02){
+                State = Decrement;
+                if(cnt > 0){
+                    --cnt;
+                    PORTC = cnt;
+                }
+            }
+            else{
+                State = Reset;
+                cnt = 0;
+                PORTC = cnt;
+            }
+            break;
+        case Decrement:
+            if((tempA & 0x03) == 0x00){
+                State = Wait;
+            }
+            else if((tempA & 0x03) == 0x01){
+                State = Increment;
+                if(cnt < 9){
+                    ++cnt;
+                    PORTC = cnt;
+                }
+            }
+            else if((tempA & 0x03) == 0x02){
+                State = Decrement;
+            }
+            else{
+                State = Reset;
+                cnt = 0;
+                PORTC = cnt;
+            }
+            break;
+        case Increment:
+            if((tempA & 0x03) == 0x00){
+                State = Wait;
+            }
+            else if((tempA & 0x03) == 0x01){
+                State = Increment;
+            }
+            else if((tempA & 0x03) == 0x02){
+                State = Decrement;
+                if(cnt > 0){
+                    --cnt;
+                    PORTC = cnt;
+                }
+            }
+            else{
+                State = Reset;
+                cnt = 0;
+                PORTC = cnt;
+            }
+            break;
+        case Reset:
+            if((tempA & 0x03) == 0x00){
+                State = Wait;
+            }
+            else if((tempA & 0x03) == 0x01){
+                State = Increment;
+                if(cnt < 9){
+                    ++cnt;
+                    PORTC =  cnt;
+                }
+            }
+            else if((tempA & 0x03) == 0x02){
+                State = Decrement;
+                if(cnt > 0)
+                {
+                    --cnt;
+                    PORTC = cnt;
+                }
+            }
+
+            else{
+                State  = Reset;
+                cnt = 0;
+                PORTC = cnt;
+            }
+            break;
+        default:
+            State = Start;
+            break;
+    }
+    switch(State){ //Actions
+        case Start:
+            PORTC =  cnt;
+            break;
+        case Wait:
+            break;
+        case Increment:
+            break;
+        case Decrement:
+            break;
+        case Reset:
+            break;
+        default:
+            break;
+    }
+}
 
 int main(void) {
     /* Insert DDR and PORT initializations */
-	DDRA = 0x00; PORTA = 0xFF;
-	DDRC = 0xFF; PORTC = 0x00;
+    DDRA = 0x00;  PORTA = 0xFF;
+    DDRC = 0xFF;  PORTC = 0x00;
+
+    State = Start;
 
     /* Insert your solution below */
-	//unsigned char tempA = 0x00;
-	//unsigned char cnt = 0x07;
-	State = Start;
-	//PORTC = 0x07;
     while (1) {
-	//tempA = PINA & 0xFF;
-	Tick();
-	
+        Tick();
     }
     return 1;
 }
 
-unsigned char Tick(){
-	//unsigned char PA0 = PINA & 0x01;
-	//unsigned char PA1 = PINA & 0x02;
-	switch(State){//Transitions
-		case Start:
-			State = Wait;
-			break;
-		case Wait:
-			if((PINA & 0x01)){
-				State = Inc;
-			}
-			else if ((PINA & 0x02)){
-				State = Dec;
-			}
-			else if ( (!(PINA & 0x01)) && (!(PINA & 0x02))){
-				State = Reset;
-			}
-			else{
-				State = Wait;
-			}
-			break;
-		case Inc:
-			State = Wait;
-			break;
-		case Dec:
-			State = Wait;
-			break;
-		case Reset:
-			State = Wait;
-			break;
-		default:
-			State = Start;
-			//printf(“reached default case\n”);
-			break;
-	}//Transitions
-
-	switch(State){//Actions
-		case Start:
-			break;
-		case Wait:
-			PORTC = cnt;
-			break;
-		case Inc:
-			if (cnt < 0x09){
-				cnt++;
-			}
-			PORTC = cnt;
-			break;
-		case Dec:
-			if (cnt > 0x00){
-				cnt--;
-			}
-			PORTC = cnt;
-			break;
-		case Reset:
-			cnt = 0x00;
-			PORTC = cnt;
-			break;
-		default:
-			//printf(“default case reached\n”);
-			break;
-	}//Actions
-	return cnt;
-
-}
