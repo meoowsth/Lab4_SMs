@@ -39,6 +39,35 @@ expectPORTC 0
 checkResult
 
 # Add tests below
+test "PINA: 0x00 => PORTB: 1, state: LED0_R"
+set state = LED0_R
+setPINA 0x0-
+continue 2
+expectPORTB 0x01
+checkResult
+
+test "PINA: 0x01 => PORTB: 2, state: LED0_P"
+set state = LED0_R
+setPINA 0x01
+continue 2
+expectPORTB 0x02
+checkResult
+
+test "PINA: 0x01 => PORTB: 2, state: LED1_R"
+set state = LED0_P
+setPINA 0x01
+continue 2
+expectPORTB 0x02
+checkResult
+
+test "PINA: 0x00 => PORTB: 2, state: LED0_P"
+set state = LED1_R
+setPINA 0x01
+continue 2
+expectPORTB 0x02
+checkResult
+
+
 
 # Report on how many tests passed/tests ran
 set $passed=$tests-$failed
